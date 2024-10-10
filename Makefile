@@ -1,24 +1,33 @@
-NAME = philo
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Werror -Wextra -Iincludes -Ilibft -g
 
-SRC = src
-SRC_FILES = $(wildcard $(SRC)/*.c)
+LIBFT_TARGET = libft/libft.a
 
-OBJ = $(SRC_FILES:.c=.o)
+SRC_DIR = src
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRC_FILES:.c=.o)
 
-$(NAME): $(OBJ)
-		$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+NAME = philo
 
 all: $(NAME)
 
+$(NAME): $(OBJS) $(LIBFT_TARGET)
+	@$(CC) $(CFLAGS) $(OBJS) -Llibft -lft -o $(NAME)
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(LIBFT_TARGET):
+	@make -C libft
+
 clean:
-	rm -rf $(OBJ)
+	@make clean -C libft
+	@rm -f $(OBJS)
 
 fclean: clean
-	rm -rf $(NAME)
+	@make fclean -C libft
+	@rm -f $(NAME)
 
-re:	fclean all
-	rm -rf $(OBJ)
+re: fclean all
 
 .PHONY: all clean fclean re

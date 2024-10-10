@@ -9,10 +9,11 @@
 
 #include <sys/time.h>
 #include <limits.h>
+# include "../libft/includes/libft.h"
 
 typedef struct s_fork
 {
-    int fork_id;
+    int fork_id; 
 }   t_fork;
 
 typedef struct s_philo
@@ -39,5 +40,7 @@ typedef struct s_table
     t_philo *philo;
 }   t_table;
 
-
+void    print_table(t_table table);
+void    free_table(t_table *table);
+long    valid_input(const char *str, long i);
 #endif
