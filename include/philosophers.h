@@ -13,7 +13,8 @@
 
 typedef struct s_fork
 {
-    int fork_id; 
+    int fork_id;
+    pthread_mutex_t mutex;
 }   t_fork;
 
 typedef struct s_philo
@@ -40,7 +41,11 @@ typedef struct s_table
     t_philo *philo;
 }   t_table;
 
-void    print_table(t_table table);
-void    free_table(t_table *table);
+void debug_print_all(t_table *table);
+void *philo_routine(void *arg);
+void    create_thread(t_table *table);
+long    get_current_time();
+int    free_table(t_table *table);
 long    valid_input(const char *str, long i);
+t_table *init_data(t_table *table);
 #endif

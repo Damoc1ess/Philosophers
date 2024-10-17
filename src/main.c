@@ -25,22 +25,36 @@ t_table *pars_args(t_table *table,int argc, char **argv)
     return (table);
 }
 
+long valid_input(const char *str, long i)
+{
+    long nbr;
+
+    nbr = ft_atol(str);
+    if (nbr > i)
+    {
+        printf("Error\n%s exceeds %ld\n", str, i);
+        return (-1);
+    }
+    if (nbr < 1)
+    {
+        ft_printf("Error\n%s must be a positive number\n", str);
+        return (-1);
+    }
+    return (nbr);
+}
+
 int main(int argc, char **argv)
 {
-    if (argc == 5 || argc == 6)
-    {
-        t_table *table;
-        table = ft_safe_malloc(sizeof(t_table));
-        if (!pars_args(table,argc, argv))
-        {
-            free_table(table);
-            return (1);
-        }
-        print_table(*table);
-    }
-    else
-    {
+    if (argc != 5 && argc != 6)
         ft_printf("Erro\nWrong number of arguments\n");
-        ft_printf("Correct is ./philo 5 800 200 200 [5]\n");
-    }
+    t_table *table;
+    table = ft_safe_malloc(sizeof(t_table));
+    if (!pars_args(table,argc, argv))
+        return (free_table(table));
+    if (!init_data(table))
+        return (free_table(table));
+    create_thread(table);
+    free_table(table);
+    
+    // debug_print_all(table);
 }
