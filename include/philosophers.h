@@ -41,6 +41,11 @@ typedef struct s_table
     t_philo *philo;
 }   t_table;
 
+typedef struct s_philo_arg {
+    t_philo *philo;
+    t_table *table;
+} t_philo_arg;
+
 void debug_print_all(t_table *table);
 void *philo_routine(void *arg);
 void    create_thread(t_table *table);
