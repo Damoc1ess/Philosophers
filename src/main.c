@@ -55,6 +55,5 @@ int main(int argc, char **argv)
         return (free_table(table));
     create_thread(table);
     free_table(table);
-    
     // debug_print_all(table);
 }

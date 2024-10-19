@@ -37,13 +37,13 @@ void *monitor_routine(void *arg)
             current_time = get_current_time();
             if (current_time - table->philo[i].last_meal_time >= table->time_to_die)
             {
-                printf("\033[1;31mPhilosopher %zu has fucking died\033[0m\n", table->philo[i].philo_id);
-                table->end_simulation = true;  // Met fin à la simulation
+                printf("\033[1;31mThe philosopher %zu is fucking dead\033[0m\n", table->philo[i].philo_id);
+                table->end_simulation = true;
                 break;
             }
             i++;
         }
-        usleep(1000);  // Petit délai pour éviter une boucle infinie rapide
+        usleep(5000);  // Réduit la charge CPU
     }
     return NULL;
 }
@@ -51,13 +51,13 @@ void *monitor_routine(void *arg)
 void create_thread(t_table *table)
 {
     int i;
-    pthread_t monitor_thread; // Thread pour surveiller la mort des philosophes
+    pthread_t monitor_thread;
     t_philo_arg *philo_arg;
 
     i = 0;
     while (i < table->philo_nbr)
     {
-        philo_arg = malloc(sizeof(t_philo_arg));  // Alloue mémoire pour chaque philosophe
+        philo_arg = malloc(sizeof(t_philo_arg));  // Allouer la mémoire pour chaque philosophe
         philo_arg->philo = &table->philo[i];      // Associe le philosophe
         philo_arg->table = table;                 // Associe la table
 
@@ -65,7 +65,6 @@ void create_thread(t_table *table)
         i++;
     }
 
-    // Lancer le thread de surveillance
     pthread_create(&monitor_thread, NULL, monitor_routine, table);
 
     i = 0;
@@ -75,9 +74,9 @@ void create_thread(t_table *table)
         i++;
     }
 
-    // Attendre la fin du thread de surveillance
     pthread_join(monitor_thread, NULL);
 }
+
 
 void *philo_routine(void *arg)
 {
@@ -85,48 +84,62 @@ void *philo_routine(void *arg)
     t_philo *philo = philo_arg->philo;
     t_table *table = philo_arg->table;
 
-    while (!table->end_simulation) // Boucle jusqu'à la fin de la simulation
+    while (!table->end_simulation)
     {
-        // Philosophe pair prend fourchette droite premier
-        if (philo->philo_id % 2 == 0)
-        {
-            // Prendre la fourchette droite
-            pthread_mutex_lock(&philo->right_fork->mutex);
-            printf("Philosopher %zu has taken right fork %d\n", philo->philo_id, philo->right_fork->fork_id);
-
-            // Prendre la fourchette gauche
-            pthread_mutex_lock(&philo->left_fork->mutex);
-            printf("Philosopher %zu has taken left fork %d\n", philo->philo_id, philo->left_fork->fork_id);
-        }
-        else
-        {
-            // Philosophe impair prend fourchette gauche premier
-            pthread_mutex_lock(&philo->left_fork->mutex);
-            printf("Philosopher %zu has taken left fork %d\n", philo->philo_id, philo->left_fork->fork_id);
-
-            pthread_mutex_lock(&philo->right_fork->mutex);
-            printf("Philosopher %zu has taken right fork %d\n", philo->philo_id, philo->right_fork->fork_id);
-        }
-
-        // Manger
-        printf("Philosopher %zu is eating\n", philo->philo_id);
+        take_forks(philo);  // Les fourchettes sont prises ici
+        printf("Philo %zu is eating\n", philo->philo_id);
         philo->meals_count++;
         philo->last_meal_time = get_current_time();
         usleep(table->time_to_eat * 1000);
 
-        // unlock les fourchettes
-        pthread_mutex_unlock(&philo->right_fork->mutex);
-        pthread_mutex_unlock(&philo->left_fork->mutex);
-        printf("Philosopher %zu has put down both forks\n", philo->philo_id);
-
-        // Dormir
-        printf("Philosopher %zu is sleeping\n", philo->philo_id);
+        release_forks(philo);  // Les fourchettes sont relâchées ici
+        printf("Philo %zu is sleeping\n", philo->philo_id);
         usleep(table->time_to_sleep * 1000);
 
-        // Réfléchir
-        printf("Philosopher %zu is thinking\n", philo->philo_id);
+        printf("Philo %zu is thinking\n", philo->philo_id);
         usleep(1000);
     }
-    free(philo_arg); // Libère la mémoire allouée pour les arguments
+
+    free(philo_arg);  // Libérer la mémoire allouée
     return NULL;
+}
+
+void take_forks(t_philo *philo)
+{
+    if (philo->philo_id % 2 == 0)
+    {
+        pthread_mutex_lock(&philo->right_fork->mutex);
+        printf("Philo %zu has taken right fork %d\n", philo->philo_id, philo->right_fork->fork_id);
+
+        pthread_mutex_lock(&philo->left_fork->mutex);
+        printf("Philo %zu has taken left fork %d\n", philo->philo_id, philo->left_fork->fork_id);
+    }
+    else
+    {
+        pthread_mutex_lock(&philo->left_fork->mutex);
+        printf("Philo %zu has taken left fork %d\n", philo->philo_id, philo->left_fork->fork_id);
+
+        pthread_mutex_lock(&philo->right_fork->mutex);
+        printf("Philo %zu has taken right fork %d\n", philo->philo_id, philo->right_fork->fork_id);
+    }
+}
+
+void release_forks(t_philo *philo)
+{
+    pthread_mutex_unlock(&philo->right_fork->mutex);
+    pthread_mutex_unlock(&philo->left_fork->mutex);
+    printf("Philo %zu has put down both forks\n", philo->philo_id);
+}
+void cleanup_table(t_table *table)
+{
+    long i = 0;
+
+    while (i < table->philo_nbr)
+    {
+        pthread_mutex_destroy(&table->fork[i].mutex);
+        i++;
+    }
+
+    free(table->fork);
+    free(table->philo);
 }

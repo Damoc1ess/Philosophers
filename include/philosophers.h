@@ -53,4 +53,6 @@ long    get_current_time();
 int    free_table(t_table *table);
 long    valid_input(const char *str, long i);
 t_table *init_data(t_table *table);
+void release_forks(t_philo *philo);
+void take_forks(t_philo *philo);
 #endif
