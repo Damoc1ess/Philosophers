@@ -46,6 +46,7 @@ typedef struct s_philo_arg {
     t_table *table;
 } t_philo_arg;
 
+void handle_one_philo(t_philo *philo, t_table *table);
 void debug_print_all(t_table *table);
 void *philo_routine(void *arg);
 void    create_thread(t_table *table);
@@ -55,4 +56,5 @@ long    valid_input(const char *str, long i);
 t_table *init_data(t_table *table);
 void release_forks(t_philo *philo);
 void take_forks(t_philo *philo);
+
 #endif

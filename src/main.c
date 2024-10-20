@@ -46,7 +46,7 @@ long valid_input(const char *str, long i)
 int main(int argc, char **argv)
 {
     if (argc != 5 && argc != 6)
-        ft_printf("Erro\nWrong number of arguments\n");
+        return(ft_printf("Erro\nWrong number of arguments\n"));
     t_table *table;
     table = ft_safe_malloc(sizeof(t_table));
     if (!pars_args(table,argc, argv))
